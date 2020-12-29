@@ -40,8 +40,14 @@
 import qs from "qs";
 import { roleinfo, menulist, roleadd, roleedit } from "../../../utils/http";
 import { successalert, erroralert } from "../../../utils/alert";
+import {mapActions , mapGetters} from 'vuex'
 export default {
   props: ["judge", "list"],
+  computed:{
+    ...mapGetters({
+      userInfo:'userInfo'
+    })
+  },
   mounted() {
     menulist().then((res) => {
       this.resdata = res.data.list;
@@ -62,6 +68,9 @@ export default {
     };
   },
   methods: {
+    ...mapActions({
+      changeUser:'changeUser'
+    }),
     //获取一条信息
     getoneinfo(id) {
       let idtorolename = "";
@@ -105,10 +114,20 @@ export default {
       }
     },
     bj() {
+      //先存储树形结构数据
+      this.adddata.menus = JSON.stringify(this.$refs.tree.getCheckedKeys());
+
       roleedit(this.adddata).then((res) => {
         if (res.data.code == 200) {
           successalert(res.data.msg);
+          if(this.adddata.id == this.userInfo.roleid){
+            this.changeUser({});
+            this.$router.push('/login');
+            console.log(111);
+            return
+          }
           this.qx();
+          this.$emit('init');
         }
       });
     },

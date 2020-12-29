@@ -3,6 +3,7 @@ import axios from 'axios'
 import qs from 'qs'
 import url from 'postcss-url'
 import { erroralert } from "./alert"
+import store from '../store'
 
 //开发环境 8080
 let baseUrl = '/api'
@@ -23,6 +24,15 @@ function dataToFormData(user){
     return data
 }
 
+//请求拦截，设置请求头
+axios.interceptors.request.use(config=>{
+    if(config.url!==baseUrl+'/api/userlogin'){
+        config.headers.authorization=store.state.userInfo.token
+    }
+    return config
+})
+
+
 //响应拦截
 axios.interceptors.response.use(res => {
     // console.group("本次请求的地址是："+res.config.url)
@@ -30,6 +40,17 @@ axios.interceptors.response.use(res => {
     // console.groupEnd()
     if (res.data.code !== 200) {
         erroralert(res.data.msg)
+    }
+    //统一处理list是null的情况
+    if(!res.data.list){
+        res.data.list = []
+    }
+    //掉线处理
+    if(res.data.msg==="登录已过期或访问权限受限"){
+        //清除用户登录的信息 userInfo
+        store.dispatch("changeUser",{})
+        //跳到登录页面
+        router.push("/login")
     }
 
     return res

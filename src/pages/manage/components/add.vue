@@ -46,8 +46,14 @@
 <script>
 import { rolelist, useradd, userinfo, useredit } from "../../../utils/http";
 import { successalert, erroralert } from "../../../utils/alert";
+import {mapActions , mapGetters} from 'vuex'
 export default {
   props: ["judge", "list"],
+  computed:{
+    ...mapGetters({
+      userInfo:'userInfo'
+    })
+  },
   data() {
     return {
       useradddata: {
@@ -60,6 +66,9 @@ export default {
     };
   },
   methods: {
+    ...mapActions({
+      changeUser:'changeUser'
+    }),
     clear() {
       this.judge.isshow = false;
       this.useradddata = {
@@ -78,9 +87,15 @@ export default {
       });
     },
     xg() {
+
       useredit(this.useradddata).then((res) => {
         if (res.data.code == 200) {
           successalert(res.data.msg);
+          if(this.useradddata.roleid == this.userInfo.roleid){
+            this.changeUser({});
+            this.$router.push("/login");
+            return;
+          }
           this.$emit("init");
           this.clear();
         }

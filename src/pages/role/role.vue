@@ -3,7 +3,7 @@
       <el-button type="primary" @click="willAdd">添加</el-button>
 
       <v-list @getrole='getrole' :list='list' @edit="edit($event)"></v-list>
-      <v-add :judge='judge' :list='list' @getrole='getrole' ref="add" ></v-add>
+      <v-add :judge='judge' :list='list' @getrole='getrole' ref="add" @init = 'init'></v-add>
   </div>
 </template>
 
@@ -48,6 +48,9 @@ export default {
       //触发add的getOne()
       this.$refs.add.getOne(id);
     },
+    init(){
+      this.getrole();
+    }
   },
   mounted() {
     this.getrole();

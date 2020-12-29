@@ -22,37 +22,27 @@
             <span slot="title">首页</span>
           </el-menu-item>
 
-          <el-submenu index="1">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>系统设置</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index="/index/menu">菜单管理</el-menu-item>
-              <el-menu-item index="/index/role">角色管理</el-menu-item>
-              <el-menu-item index="/index/manage">管理员管理</el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
-          <el-submenu index="3">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>商城管理</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index="/index/cate">商品分类</el-menu-item>
-              <el-menu-item index="/index/specs">商品规格</el-menu-item>
-              <el-menu-item index="/index/goods">商品管理</el-menu-item>
-              <el-menu-item index="/index/member">会员管理</el-menu-item>
-              <el-menu-item index="/index/banner">轮播图管理</el-menu-item>
-              <el-menu-item index="/index/seckill">秒杀活动</el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
+          <div v-for="item in userInfo.menus" :key = 'item.id'>
+            <!-- 单纯是菜单 -->
+            <el-menu-item v-if="!item.children" :index="'/index'+item.url">{{item.title}}</el-menu-item>
+            <!-- 有目录，有菜单 -->
+            <el-submenu :index="item.id+''" v-if="item.children">
+              <template slot="title">
+                <i :class="item.icon"></i>
+                <span>{{item.title}}</span>
+              </template>
+              <el-menu-item-group>
+                <el-menu-item v-for="i in item.children" :key="i.id" :index="'/index'+i.url">{{i.title}}</el-menu-item>
+              </el-menu-item-group>
+            </el-submenu>
+          </div>
         </el-menu>
       </el-aside>
       <el-container>
         <el-header>
-          <div class="fr">
-            <i>admain</i>
+          <div class="fr headerInfo">
+            <el-button type="info" round @click="logout" class="logout">退出登录</el-button>
+            <i>{{userInfo.username}}</i>
             <i class="el-icon-s-tools"></i>
           </div>
         </el-header>
@@ -71,7 +61,23 @@
 </template>
 
 <script>
-export default {};
+import {mapActions , mapGetters} from 'vuex'
+export default {
+  computed:{
+    ...mapGetters({
+      userInfo:'userInfo'
+    })
+  },
+  methods: {
+    ...mapActions({
+      changeUser:"changeUser"
+    }),
+    logout(){
+      this.changeUser({});
+      this.$router.replace('/login');
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -86,5 +92,13 @@ export default {};
 }
 .con {
   padding-top: 20px;
+}
+.headerInfo{
+  padding: 20px 0;
+  font-size: 16px;
+}
+.logout{
+  height: 18px;
+  padding: 5px;
 }
 </style>
