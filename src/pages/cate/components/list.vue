@@ -7,11 +7,11 @@
       border
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
-      <el-table-column prop="id" label="分类编号" sortable width="100">
+      <el-table-column prop="id" label="分类编号"  width="100">
       </el-table-column>
-      <el-table-column prop="catename" label="分类名称" sortable>
+      <el-table-column prop="catename" label="分类名称">
       </el-table-column>
-      <el-table-column label="图片" sortable>
+      <el-table-column label="图片">
         <template slot-scope="scope">
           <div>
             <img

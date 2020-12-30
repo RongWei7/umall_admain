@@ -1,6 +1,5 @@
 <template>
   <div>
-      <el-button type="primary" @click="willAdd">添加</el-button>
       <v-list :list='list' @init='init'  @edit='edit($event)'></v-list>
       <v-add :judge='judge' :list='list' @init='init' ref="add"></v-add>
   </div>

@@ -4,19 +4,11 @@
       :title="judge.isadd ? '轮播图添加' : '轮播图修改'"
       :visible.sync="judge.isshow"
     >
-      {{ banneradddata }}
       <el-form :model="banneradddata">
         <el-form-item label="标题" label-width="100px">
-          <el-input
-            v-model="banneradddata.title"
-            autocomplete="off"
-          ></el-input>
+          <el-input v-model="banneradddata.title" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item
-          label="图片"
-          label-width="100px"
-          v-if="judge.isadd"
-        >
+        <el-form-item label="图片" label-width="100px" v-if="judge.isadd">
           <el-upload
             action="#"
             list-type="picture-card"
@@ -90,14 +82,14 @@
 </template>
 
 <script>
-import { banneradd , bannerinfo , banneredit} from "../../../utils/http";
+import { banneradd, bannerinfo, banneredit } from "../../../utils/http";
 import { successalert, erroralert } from "../../../utils/alert";
 export default {
   props: ["judge", "list"],
   data() {
     return {
       banneradddata: {
-        title: '',
+        title: "",
         img: null,
         status: 1,
       },
@@ -121,6 +113,17 @@ export default {
     handleDownload(file) {
       console.log(file);
     },
+    //验证函数
+    checkprops() {
+      return new Promise((reslove) => {
+        if (this.banneradddata.title == "") {
+          erroralert("标题不能为空");
+          return;
+        }
+
+        reslove();
+      });
+    },
     changeImg(e) {
       let file = e.raw;
       //判断
@@ -130,29 +133,32 @@ export default {
     clear() {
       this.judge.isshow = false;
       this.banneradddata = {
-        title: '',
+        title: "",
         img: null,
         status: 1,
       };
       this.imgUrl = "";
     },
     add() {
-      banneradd(this.banneradddata).then((res) => {
-          console.log(res);
-        if (res.data.code == 200) {
-          successalert(res.data.msg);
-          this.clear();
-          this.$emit("init");
-        }
+      this.checkprops().then(() => {
+        banneradd(this.banneradddata).then((res) => {
+          if (res.data.code == 200) {
+            successalert(res.data.msg);
+            this.clear();
+            this.$emit("init");
+          }
+        });
       });
     },
     bj() {
-      banneredit(this.banneradddata).then((res) => {
-        if (res.data.code == 200) {
-          successalert(res.data.msg);
-          this.clear();
-          this.$emit("init");
-        }
+      this.checkprops().then(() => {
+        banneredit(this.banneradddata).then((res) => {
+          if (res.data.code == 200) {
+            successalert(res.data.msg);
+            this.clear();
+            this.$emit("init");
+          }
+        });
       });
     },
     qx() {
@@ -168,9 +174,7 @@ export default {
       });
     },
   },
-  mounted() {
-
-  },
+  mounted() {},
 };
 </script>
 

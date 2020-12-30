@@ -16,7 +16,7 @@
           <div>
             <img
               v-if="scope.row.img !== 'null'"
-              :src="'http://127.0.0.1:3000' + scope.row.img"
+              :src="$pre + scope.row.img"
               class="img"
             />
           </div>

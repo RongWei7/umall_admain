@@ -110,7 +110,7 @@
 
 <script>
 import E from "wangeditor";
-import { successalert } from "../../../utils/alert";
+import { successalert, erroralert } from "../../../utils/alert";
 import { mapActions, mapGetters } from "vuex";
 import { catelist, goodsedit, goodsadd, goodsinfo } from "../../../utils/http";
 export default {
@@ -155,6 +155,53 @@ export default {
       reqlist: "goods/reqList",
       reqtotal: "goods/reqTotal",
     }),
+    //验证封装
+    checkProps() {
+      return new Promise((resolve, reject) => {
+        if (this.user.first_cateid === "") {
+          erroralert("一级分类不能为空");
+          return;
+        }
+
+        if (this.user.second_cateid === "") {
+          erroralert("二级分类不能为空");
+          return;
+        }
+        if (this.user.goodsname === "") {
+          erroralert("商品名称不能为空");
+          return;
+        }
+
+        if (this.user.price === "") {
+          erroralert("商品价格不能为空");
+          return;
+        }
+
+        if (this.user.market_price === "") {
+          erroralert("商品市场价格不能为空");
+          return;
+        }
+
+        if (!this.user.img) {
+          erroralert("请上传图片");
+          return;
+        }
+        if (this.user.specsid === "") {
+          erroralert("商品规格不能为空");
+          return;
+        }
+
+        if (this.user.specsattr.length === 0) {
+          erroralert("请选择规格属性");
+          return;
+        }
+        if (this.editor.txt.html() == "") {
+          erroralert("请输入商品描述");
+          return;
+        }
+        resolve();
+      });
+    },
     //修改一级分类
     changeFirstCateId() {
       //二级分类清除
@@ -227,15 +274,18 @@ export default {
         ...this.user,
         specsattr: JSON.stringify(this.user.specsattr),
       };
-      //请求
-      goodsadd(data).then((res) => {
-        if (res.data.code == 200) {
-          this.cancel();
-          this.clear();
-          successalert(res.data.msg);
-          this.reqlist();
-          this.reqtotal();
-        }
+
+      this.checkProps().then(() => {
+        //请求
+        goodsadd(data).then((res) => {
+          if (res.data.code == 200) {
+            this.cancel();
+            this.clear();
+            successalert(res.data.msg);
+            this.reqlist();
+            this.reqtotal();
+          }
+        });
       });
     },
     getOne(id) {
@@ -267,13 +317,16 @@ export default {
         specsattr: JSON.stringify(this.user.specsattr),
       };
 
-      goodsedit(data).then((res) => {
-        if (res.data.code == 200) {
-          this.cancel();
-          this.clear();
-          successalert(res.data.msg);
-          this.reqlist();
-        }
+      this.checkProps().then(() => {
+        //发请求
+        goodsedit(data).then((res) => {
+          if (res.data.code == 200) {
+            this.cancel();
+            this.clear();
+            successalert(res.data.msg);
+            this.reqlist();
+          }
+        });
       });
     },
     //创建富文本编辑器

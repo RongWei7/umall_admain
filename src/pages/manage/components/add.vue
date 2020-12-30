@@ -1,6 +1,9 @@
 <template>
   <div>
-    <el-dialog title="收货地址" :visible.sync="judge.isshow">
+    <el-dialog
+      :title="judge.isadd ? '管理员添加' : '管理员修改'"
+      :visible.sync="judge.isshow"
+    >
       <el-form :model="useradddata">
         <el-form-item label="所属角色" label-width="100px">
           <el-select v-model="useradddata.roleid" placeholder="请选择">
@@ -33,7 +36,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="judge.isshow = false">取 消</el-button>
+        <el-button @click="qx">取 消</el-button>
         <el-button type="primary" @click="add" v-if="judge.isadd"
           >添 加</el-button
         >
@@ -46,13 +49,13 @@
 <script>
 import { rolelist, useradd, userinfo, useredit } from "../../../utils/http";
 import { successalert, erroralert } from "../../../utils/alert";
-import {mapActions , mapGetters} from 'vuex'
+import { mapActions, mapGetters } from "vuex";
 export default {
   props: ["judge", "list"],
-  computed:{
+  computed: {
     ...mapGetters({
-      userInfo:'userInfo'
-    })
+      userInfo: "userInfo",
+    }),
   },
   data() {
     return {
@@ -67,8 +70,27 @@ export default {
   },
   methods: {
     ...mapActions({
-      changeUser:'changeUser'
+      changeUser: "changeUser",
     }),
+    //验证函数
+    checkprops() {
+      return new Promise((reslove) => {
+        if (this.useradddata.roleid == "") {
+          erroralert("所属角色不能为空");
+          return;
+        }
+        if (this.useradddata.username == "") {
+          erroralert("用户名不能为空");
+          return;
+        }
+        if (this.useradddata.password == "") {
+          erroralert("请输入密码");
+          return;
+        }
+
+        reslove();
+      });
+    },
     clear() {
       this.judge.isshow = false;
       this.useradddata = {
@@ -86,23 +108,22 @@ export default {
         }
       });
     },
+    qx() {
+      this.clear();
+    },
     xg() {
-
-      useredit(this.useradddata).then((res) => {
-        if (res.data.code == 200) {
-          successalert(res.data.msg);
-          if(this.useradddata.roleid == this.userInfo.roleid){
-            this.changeUser({});
-            this.$router.push("/login");
-            return;
+      this.checkprops().then(() => {
+        useredit(this.useradddata).then((res) => {
+          if (res.data.code == 200) {
+            successalert(res.data.msg);
+            this.$emit("init");
+            this.clear();
           }
-          this.$emit("init");
-          this.clear();
-        }
+        });
       });
     },
     add() {
-      if (this.useradddata.roleid != "" && this.useradddata.username != "") {
+      this.checkprops().then(() => {
         useradd(this.useradddata).then((res) => {
           if (res.data.code == 200) {
             successalert(res.data.msg);
@@ -110,9 +131,7 @@ export default {
             this.clear();
           }
         });
-      } else {
-        erroralert("所属角色或用户名不能为空");
-      }
+      });
     },
   },
   mounted() {

@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { successalert } from "../../../utils/alert";
+import { successalert , erroralert} from "../../../utils/alert";
 import { mapActions, mapGetters } from "vuex";
 import { specsadd, specsinfo, specsedit } from "../../../utils/http";
 export default {
@@ -79,6 +79,21 @@ export default {
       reqlist: "specs/reqlist",
       reqtotal: "specs/reqtotal",
     }),
+    //验证函数
+    checkprops() {
+      return new Promise((reslove) => {
+        if (this.specsadddata.specsname == "") {
+          erroralert("规格名称不能为空");
+          return;
+        }
+        if (this.attrsArr.some((item) => item.value === "")) {
+          erroralert("请正确输入商品规格属性");
+          return;
+        }
+
+        reslove();
+      });
+    },
     //清空
     clear() {
       this.specsadddata = {
@@ -107,14 +122,16 @@ export default {
       this.specsadddata.attrs = JSON.stringify(
         this.attrsArr.map((item) => item.value)
       );
-      specsadd(this.specsadddata).then((res) => {
-        if (res.data.code == 200) {
-          this.cancel();
-          this.clear();
-          successalert(res.data.msg);
-          this.reqlist();
-          this.reqtotal();
-        }
+      this.checkprops().then(() => {
+        specsadd(this.specsadddata).then((res) => {
+          if (res.data.code == 200) {
+            this.cancel();
+            this.clear();
+            successalert(res.data.msg);
+            this.reqlist();
+            this.reqtotal();
+          }
+        });
       });
     },
     getOne(id) {
@@ -132,13 +149,15 @@ export default {
       this.specsadddata.attrs = JSON.stringify(
         this.attrsArr.map((item) => item.value)
       );
-      specsedit(this.specsadddata).then((res) => {
-        if (res.data.code == 200) {
-          this.cancel();
-          this.clear();
-          successalert(res.data.msg);
-          this.reqlist();
-        }
+      this.checkprops().then(() => {
+        specsedit(this.specsadddata).then((res) => {
+          if (res.data.code == 200) {
+            this.cancel();
+            this.clear();
+            successalert(res.data.msg);
+            this.reqlist();
+          }
+        });
       });
     },
   },

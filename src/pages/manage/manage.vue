@@ -40,7 +40,7 @@ methods: {
     getlist() {
       userlist(this.userdata).then((res) => {
         if(res.data.code == 200){
-          if(res.data.list==null&&this.userdata.page>1){
+          if(res.data.list.length==0&&this.userdata.page>1){
             this.userdata.page--
             this.getlist();
             return
@@ -77,6 +77,7 @@ methods: {
 },
 mounted() {
   this.getpages()
+  this.getlist()
 },
 }
 </script>

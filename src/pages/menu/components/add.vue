@@ -17,7 +17,7 @@
               v-for="item in list"
               :key="item.id"
               :value="item.id"
-              :lable="item.title"
+              :label="item.title"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -56,7 +56,9 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="isshow.isshow = false">取 消</el-button>
-        <el-button type="primary" @click="add" v-if="isshow.isadd">添 加</el-button>
+        <el-button type="primary" @click="add" v-if="isshow.isadd"
+          >添 加</el-button
+        >
         <el-button type="primary" @click="xg" v-else>修 改</el-button>
       </div>
     </el-dialog>
@@ -64,9 +66,9 @@
 </template>
 
 <script>
-import {indexRoutes} from '../../../router'
-import { menuadd , menuinfo , menuedit} from "../../../utils/http";
-import {successalert} from '../../../utils/alert'
+import { indexRoutes } from "../../../router";
+import { menuadd, menuinfo, menuedit } from "../../../utils/http";
+import { successalert, erroralert } from "../../../utils/alert";
 export default {
   props: ["isshow", "list"],
   data() {
@@ -90,6 +92,17 @@ export default {
     };
   },
   methods: {
+    //验证函数
+    checkprops() {
+      return new Promise((reslove) => {
+        if (this.adddate.title == "") {
+          erroralert("菜单名称不能为空");
+          return;
+        }
+
+        reslove();
+      });
+    },
     clearadd() {
       this.adddate = {
         pid: 0,
@@ -101,16 +114,17 @@ export default {
       };
     },
     add() {
-      console.log(this.indexRoutes);
-      //请求数据
-      menuadd(this.adddate).then((res) => {
-        successalert(res.data.msg)
-        //弹框消失
-        this.isshow.isshow = false;
-        // 清空adddate
-        this.clearadd;
-        //重新渲染
-        this.$emit('init')
+      this.checkprops().then(() => {
+        //请求数据
+        menuadd(this.adddate).then((res) => {
+          successalert(res.data.msg);
+          //弹框消失
+          this.isshow.isshow = false;
+          // 清空adddate
+          this.clearadd();
+          //重新渲染
+          this.$emit("init");
+        });
       });
     },
     changePid() {
@@ -120,29 +134,28 @@ export default {
         this.adddate.type = 2;
       }
     },
-    getOne(id){
-      menuinfo({id:id}).then(res=>{
-        if(res.data.code == 200){
+    getOne(id) {
+      menuinfo({ id: id }).then((res) => {
+        if (res.data.code == 200) {
           this.adddate = res.data.list;
-          this.adddate.id = id
+          this.adddate.id = id;
         }
-      })
+      });
     },
-    xg(){
-      //发请求
-      menuedit(this.adddate).then(res=>{
-        successalert(res.data.msg)
-        //门板消失
-        this.isshow.isshow = false
-        //初始化adddate
-        this.clearadd()
-        //重新渲染
-        this.$emit('init')
-      })
-
-      
-
-    }
+    xg() {
+      this.checkprops().then(() => {
+        //发请求
+        menuedit(this.adddate).then((res) => {
+          successalert(res.data.msg);
+          //门板消失
+          this.isshow.isshow = false;
+          //初始化adddate
+          this.clearadd();
+          //重新渲染
+          this.$emit("init");
+        });
+      });
+    },
   },
 };
 </script>

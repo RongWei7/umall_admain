@@ -4,7 +4,6 @@
       :title="judge.isadd ? '活动添加' : '活动修改'"
       :visible.sync="judge.isshow"
     >
-      {{ seckilladddata }}
       <el-form :model="seckilladddata">
         <el-form-item label="活动名称" label-width="100px">
           <el-input
@@ -86,7 +85,13 @@
 </template>
 
 <script>
-import { catelist, goodslist, seckadd, seckinfo , seckedit } from "../../../utils/http";
+import {
+  catelist,
+  goodslist,
+  seckadd,
+  seckinfo,
+  seckedit,
+} from "../../../utils/http";
 import { successalert, erroralert } from "../../../utils/alert";
 export default {
   props: ["judge", "list"],
@@ -108,6 +113,36 @@ export default {
     };
   },
   methods: {
+    //验证函数
+    checkprops() {
+      return new Promise((reslove) => {
+        if (this.seckilladddata.title == "") {
+          erroralert("活动名称不能为空");
+          return;
+        }
+        if (
+          this.seckilladddata.begintime == "" ||
+          this.seckilladddata.endtime == ""
+        ) {
+          erroralert("请输入正确的活动时间");
+          return;
+        }
+        if (this.seckilladddata.first_cateid == "") {
+          erroralert("请选择一级分类");
+          return;
+        }
+        if (this.seckilladddata.second_cateid == "") {
+          erroralert("请选择二级分类");
+          return;
+        }
+        if (this.seckilladddata.goodsid == "") {
+          erroralert("请选择商品");
+          return;
+        }
+
+        reslove();
+      });
+    },
     clear() {
       this.judge.isshow = false;
       this.seckilladddata = {
@@ -127,46 +162,52 @@ export default {
     },
     change(e) {
       //将二级分类清空
-      this.seckilladddata.second_cateid=""
-      this.seckilladddata.goodsid=""
-      this.getSecondList()
+      this.seckilladddata.second_cateid = "";
+      this.seckilladddata.goodsid = "";
+      this.getSecondList();
     },
-    getSecondList(){
-      let result = this.goodscate.find( (item, index)=> {
-        return item.id ==this.seckilladddata.first_cateid
+    getSecondList() {
+      let result = this.goodscate.find((item, index) => {
+        return item.id == this.seckilladddata.first_cateid;
       });
       this.second_list = result.children;
     },
     change2(e) {
-      this.seckilladddata.goodsid=""
+      this.seckilladddata.goodsid = "";
 
-      this.getGoodsList()
-      
+      this.getGoodsList();
     },
     //商品列表
-    getGoodsList(){
-      goodslist({fid:this.seckilladddata.first_cateid,sid:this.seckilladddata.second_cateid}).then((res) => {
+    getGoodsList() {
+      goodslist({
+        fid: this.seckilladddata.first_cateid,
+        sid: this.seckilladddata.second_cateid,
+      }).then((res) => {
         if (res.data.code == 200) {
           this.goodslists = res.data.list;
         }
       });
     },
     add() {
-      seckadd(this.seckilladddata).then((res) => {
-        if (res.data.code == 200) {
-          successalert(res.data.msg);
-          this.clear();
-          this.$emit("init");
-        }
+      this.checkprops().then(() => {
+        seckadd(this.seckilladddata).then((res) => {
+          if (res.data.code == 200) {
+            successalert(res.data.msg);
+            this.clear();
+            this.$emit("init");
+          }
+        });
       });
     },
     bj() {
-      seckedit(this.seckilladddata).then((res) => {
-        if (res.data.code == 200) {
-          successalert(res.data.msg);
-          this.clear();
-          this.$emit("init");
-        }
+      this.checkprops().then(() => {
+        seckedit(this.seckilladddata).then((res) => {
+          if (res.data.code == 200) {
+            successalert(res.data.msg);
+            this.clear();
+            this.$emit("init");
+          }
+        });
       });
     },
     qx() {
@@ -177,9 +218,12 @@ export default {
         if (res.data.code == 200) {
           this.seckilladddata = res.data.list;
           this.seckilladddata.id = id;
-          this.value2=[new Date(parseInt(this.seckilladddata.begintime)),new Date(parseInt(this.seckilladddata.endtime))]
-          this.getSecondList()
-          this.getGoodsList()
+          this.value2 = [
+            new Date(parseInt(this.seckilladddata.begintime)),
+            new Date(parseInt(this.seckilladddata.endtime)),
+          ];
+          this.getSecondList();
+          this.getGoodsList();
         }
       });
     },

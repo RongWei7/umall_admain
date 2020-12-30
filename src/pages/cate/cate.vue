@@ -32,7 +32,6 @@ methods: {
   //获取列表
   getList(){
     catelist({istree:true}).then(res=>{
-      console.log(res);
       if(res.data.code == 200){
         this.list = res.data.list
       }

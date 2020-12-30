@@ -27,29 +27,47 @@
 
 <script>
 import { userLogin } from "../../utils/http";
-import { successalert } from "../../utils/alert";
+import { successalert, erroralert } from "../../utils/alert";
 import { mapActions } from "vuex";
 export default {
   methods: {
     ...mapActions({
       changeUser: "changeUser",
     }),
-    login() {
-      userLogin(this.user).then((res) => {
-        if (res.data.code == 200) {
-          //用户信息存到store
-          this.changeUser(res.data.list);
-          this.$router.push("/index");
-          successalert(res.data.msg);
+    //封装验证
+    checkProps() {
+      return new Promise((resolve) => {
+        if (this.user.username == "") {
+          erroralert("账号不能为空");
+          return;
         }
+
+        if (this.user.password == "") {
+          erroralert("请输入密码");
+          return;
+        }
+
+        resolve();
+      });
+    },
+    login() {
+      this.checkProps().then(() => {
+        userLogin(this.user).then((res) => {
+          if (res.data.code == 200) {
+            //用户信息存到store
+            this.changeUser(res.data.list);
+            this.$router.push("/index");
+            successalert(res.data.msg);
+          }
+        });
       });
     },
   },
   data() {
     return {
       user: {
-        name: "",
-        pass: "",
+        username: "",
+        password: "",
       },
     };
   },

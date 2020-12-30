@@ -1,28 +1,15 @@
 <template>
   <div>
-    <el-dialog
-      title="会员修改"
-      :visible.sync="judge.isshow"
-    >
-      {{ memberdata }}
+    <el-dialog title="会员修改" :visible.sync="judge.isshow">
       <el-form :model="memberdata">
         <el-form-item label="手机号" label-width="100px">
-          <el-input
-            v-model="memberdata.phone"
-            autocomplete="off"
-          ></el-input>
+          <el-input v-model="memberdata.phone" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="昵称" label-width="100px">
-          <el-input
-            v-model="memberdata.nickname"
-            autocomplete="off"
-          ></el-input>
+          <el-input v-model="memberdata.nickname" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="密码" label-width="100px">
-          <el-input
-            v-model="memberdata.password"
-            autocomplete="off"
-          ></el-input>
+          <el-input v-model="memberdata.password" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="状态" label-width="100px">
           <el-switch
@@ -41,39 +28,60 @@
 </template>
 
 <script>
-import { memberinfo , membereditt} from "../../../utils/http";
+import { memberinfo, membereditt } from "../../../utils/http";
 import { successalert, erroralert } from "../../../utils/alert";
 export default {
   props: ["judge", "list"],
   data() {
     return {
       memberdata: {
-        uid: '',
+        uid: "",
         nickname: "",
-        phone:'',
-        password:'',
+        phone: "",
+        password: "",
         status: 1,
       },
     };
   },
   methods: {
+    //验证函数
+    checkprops() {
+      return new Promise((reslove) => {
+        if (this.memberdata.phone == "") {
+          erroralert("手机号不能为空");
+          return;
+        }
+        if (this.memberdata.nickname == "") {
+          erroralert("昵称不能为空");
+          return;
+        }
+        if (this.memberdata.password == "") {
+          erroralert("请输入密码");
+          return;
+        }
+
+        reslove();
+      });
+    },
     clear() {
       this.judge.isshow = false;
       this.memberdata = {
-        uid: '',
+        uid: "",
         nickname: "",
-        phone:'',
-        password:'',
+        phone: "",
+        password: "",
         status: 1,
       };
     },
     bj() {
-      membereditt(this.memberdata).then((res) => {
-        if (res.data.code == 200) {
-          successalert(res.data.msg);
-          this.clear();
-          this.$emit("init");
-        }
+      this.checkprops().then(() => {
+        membereditt(this.memberdata).then((res) => {
+          if (res.data.code == 200) {
+            successalert(res.data.msg);
+            this.clear();
+            this.$emit("init");
+          }
+        });
       });
     },
     qx() {
@@ -83,13 +91,12 @@ export default {
       memberinfo({ uid: id }).then((res) => {
         if (res.data.code == 200) {
           this.memberdata = res.data.list;
-          this.memberdata.password = '';
+          this.memberdata.password = "";
         }
       });
     },
   },
-  mounted() {
-  },
+  mounted() {},
 };
 </script>
 

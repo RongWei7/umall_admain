@@ -38,7 +38,6 @@ let actions={
         let params=bool?{}:{page:context.state.page,size:context.state.size}
         //发请求
         goodslist(params).then(res=>{
-            console.log(res);
             if(res.data.code){
                 //删除的是最后一页的最后一条
                 if(res.data.list.length===0&&context.state.page>1){

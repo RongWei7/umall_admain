@@ -40,13 +40,13 @@
 import qs from "qs";
 import { roleinfo, menulist, roleadd, roleedit } from "../../../utils/http";
 import { successalert, erroralert } from "../../../utils/alert";
-import {mapActions , mapGetters} from 'vuex'
+import { mapActions, mapGetters } from "vuex";
 export default {
   props: ["judge", "list"],
-  computed:{
+  computed: {
     ...mapGetters({
-      userInfo:'userInfo'
-    })
+      userInfo: "userInfo",
+    }),
   },
   mounted() {
     menulist().then((res) => {
@@ -69,8 +69,23 @@ export default {
   },
   methods: {
     ...mapActions({
-      changeUser:'changeUser'
+      changeUser: "changeUser",
     }),
+    //验证函数
+    checkprops() {
+      return new Promise((reslove) => {
+        if (this.adddata.rolename == "") {
+          erroralert("角色名称不能为空");
+          return;
+        }
+        if (this.adddata.menus == "" || this.adddata.menus == "[]") {
+          erroralert("角色不能没有权限");
+          return;
+        }
+
+        reslove();
+      });
+    },
     //获取一条信息
     getoneinfo(id) {
       let idtorolename = "";
@@ -101,34 +116,33 @@ export default {
       this.clearrole();
     },
     qd() {
-      if (this.adddata.rolename != "") {
+      this.checkprops().then(() => {
         roleadd(this.adddata).then((res) => {
           if (res.data.code == 200) {
             successalert(res.data.msg);
-            this.qx()
+            this.qx();
             this.$emit("getrole");
           }
         });
-      } else {
-        erroralert("角色名不能为空");
-      }
+      });
     },
     bj() {
-      //先存储树形结构数据
-      this.adddata.menus = JSON.stringify(this.$refs.tree.getCheckedKeys());
-
-      roleedit(this.adddata).then((res) => {
-        if (res.data.code == 200) {
-          successalert(res.data.msg);
-          if(this.adddata.id == this.userInfo.roleid){
-            this.changeUser({});
-            this.$router.push('/login');
-            console.log(111);
-            return
+      this.checkprops().then(() => {
+        //先存储树形结构数据
+        this.adddata.menus = JSON.stringify(this.$refs.tree.getCheckedKeys());
+        roleedit(this.adddata).then((res) => {
+          if (res.data.code == 200) {
+            successalert(res.data.msg);
+            if (this.adddata.id == this.userInfo.roleid) {
+              this.changeUser({});
+              this.$router.push("/login");
+              console.log(111);
+              return;
+            }
+            this.qx();
+            this.$emit("init");
           }
-          this.qx();
-          this.$emit('init');
-        }
+        });
       });
     },
     getOne(id) {

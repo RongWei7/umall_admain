@@ -4,7 +4,6 @@
       :title="judge.isadd ? '商品添加' : '商品修改'"
       :visible.sync="judge.isshow"
     >
-      {{ cateadddata }}
       <el-form :model="cateadddata">
         <el-form-item label="上级分类" label-width="100px">
           <el-select v-model="cateadddata.pid" placeholder="请选择">
@@ -137,6 +136,17 @@ export default {
     handleDownload(file) {
       console.log(file);
     },
+    //验证函数
+    checkprops() {
+      return new Promise((reslove) => {
+        if (this.cateadddata.catename == "") {
+          erroralert("分类名称不能为空");
+          return;
+        }
+
+        reslove();
+      });
+    },
     changeImg(e) {
       let file = e.raw;
       //判断
@@ -154,23 +164,25 @@ export default {
       this.imgUrl = "";
     },
     add() {
-      cateadd(this.cateadddata).then((res) => {
-        if (res.data.code == 200) {
-          successalert(res.data.msg);
-          this.clear();
-          this.$emit("init");
-        }
+      this.checkprops().then(() => {
+        cateadd(this.cateadddata).then((res) => {
+          if (res.data.code == 200) {
+            successalert(res.data.msg);
+            this.clear();
+            this.$emit("init");
+          }
+        });
       });
     },
     bj() {
-      console.log(111);
-      cateedit(this.cateadddata).then((res) => {
-        console.log(res);
-        if (res.data.code == 200) {
-          successalert(res.data.msg);
-          this.clear();
-          this.$emit("init");
-        }
+      this.checkprops().then(() => {
+        cateedit(this.cateadddata).then((res) => {
+          if (res.data.code == 200) {
+            successalert(res.data.msg);
+            this.clear();
+            this.$emit("init");
+          }
+        });
       });
     },
     qx() {
